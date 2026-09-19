@@ -50,7 +50,7 @@ namespace Pacman
                 _ => false
             };
         }
-        private bool HasEntity()
+        public bool HasEntity()
         {
             if (Occupier != null)
             {
@@ -68,6 +68,22 @@ namespace Pacman
                 return null;
         }
         
+        // Setters
+        public bool EatPellet()
+        {
+            if (HasPellet)
+            {
+                HasPellet = false;
+                return true;
+            }
+            else if (HasPowerPellet)
+            {
+                HasPowerPellet = false;
+                return true;
+            }
+            else return false;
+        }
+
         // Entity Methods
         public bool TryOccupy(Entity entity)
         {

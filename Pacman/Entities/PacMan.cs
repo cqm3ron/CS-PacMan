@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.Design;
+using System.Diagnostics;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -9,6 +11,11 @@ namespace Pacman.Entities
 {
     internal class PacMan((int x, int y) position) : Entity(position)
     {
+        private int score = 0;
+        private Thread PowerUpThread;
+        private bool IsPoweredUp = false;
+        private Stopwatch PowerUpTimer = new();
+        private int PowerUpDurationSeconds = 6;
         public bool TryChangeDirection(Direction direction)
         {
             Dir = direction;
@@ -70,6 +77,37 @@ namespace Pacman.Entities
             Pos = newPos;
             return hasMoved;
         }
-        public override (ConsoleColor foreground, ConsoleColor background, string top, string bottom) GetVisual() => (ConsoleColor.Yellow, ConsoleColor.Black, "CC", "CC");
+        public override (ConsoleColor foreground, ConsoleColor background, string top, string bottom) GetVisual()
+        {
+            if (IsPoweredUp) return (ConsoleColor.Blue, ConsoleColor.Black, "CC", "CC");
+            else return (ConsoleColor.Yellow, ConsoleColor.Black, "CC", "CC");
+        }
+        public void EatPellet() => score += 10;
+        public void EatPowerPellet()
+        {
+            PowerUpThread = new Thread(PowerUpLoop);
+            score += 50;
+            IsPoweredUp = true;
+            PowerUpThread.Start();
+        }
+        private void PowerUpLoop()
+        {
+            PowerUpTimer.Restart();
+            Debug.WriteLine("Powerup");
+            while (IsPoweredUp)
+            {
+                if (PowerUpTimer.ElapsedMilliseconds >= PowerUpDurationSeconds * 1000)
+                {
+                    IsPoweredUp = false;
+                    PowerUpTimer.Stop();
+                    Debug.WriteLine("No more powerup");
+                    PowerUpThread.Join();
+                }
+            }
+        }
+        public void Collide()
+        {
+            
+        }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using Pacman.Entities;
+using System.Diagnostics;
 using System.Runtime.InteropServices;
 
 namespace Pacman
@@ -37,6 +38,42 @@ namespace Pacman
             (int x, int y) previous = PacMan.GetPreviousPosition();
             Tiles[previous.x, previous.y].TryVacate(PacMan);
             Tiles[position.x, position.y].TryOccupy(PacMan);
+            if (CheckCollision(position)) PacMan.Collide();
+            TryEatPellet(position);
+        }
+        public bool TryEatPellet((int x, int y) position)
+        {
+            if (Tiles[position.x, position.y].HasPellet)
+            {
+                if (Tiles[position.x, position.y].EatPellet())
+                {
+                    PacMan.EatPellet();
+                    PelletsCollected++;
+                    return true;
+                }
+                else return false;
+            }
+            else if (Tiles[position.x, position.y].HasPowerPellet)
+            {
+                if (Tiles[position.x, position.y].EatPellet())
+                {
+                    PacMan.EatPowerPellet();
+                    PowerPelletsCollected++;
+                    return true;
+                }
+                else return false;
+            }
+            else return false;
+        }
+        private bool CheckCollision((int x, int y) position)
+        {
+            if (Tiles[position.x, position.y].Occupied)
+            {
+                Entity? occupier = Tiles[position.x, position.y].GetOccupier();
+                if (occupier != null && occupier is not Entities.PacMan)
+                    return true;
+            }
+            return false;
         }
 
         // Getters
